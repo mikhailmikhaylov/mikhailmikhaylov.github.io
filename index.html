@@ -7,9 +7,34 @@
 
     <!-- <link type="text/css" rel="stylesheet" href="styles.css"> -->
     <!-- <script type="application/javascript" src="composeApp.js"></script> -->
+    <style>
+        #videoContainer {
+            margin: 20px 0;
+            max-width: 640px;
+        }
+        #videoElement {
+            width: 100%;
+            border: 2px solid #333;
+            border-radius: 5px;
+        }
+        .controls {
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
+
+
     <h1>Page loaded</h1>
+
+    <div id="videoContainer">
+        <h2>Camera Feed</h2>
+        <video id="videoElement" autoplay playsinline></video>
+        <div class="controls">
+            <button id="startButton">Start Camera</button>
+            <button id="stopButton">Stop Camera</button>
+        </div>
+    </div>
 
     <a href="#last-section">Scroll to Bottom</a>
 
@@ -88,5 +113,60 @@
         <h2>Last Section</h2>
         <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Vivamus lacinia odio vitae vestibulum. Donec in efficitur ipsum, in egestas libero. Aliquam erat volutpat. Nullam quis risus eget urna mollis ornare vel eu leo.</p>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const videoElement = document.getElementById('videoElement');
+            const startButton = document.getElementById('startButton');
+            const stopButton = document.getElementById('stopButton');
+
+            let stream = null;
+
+            // Function to start the camera
+            async function startCamera() {
+                try {
+                    // Request access to the user's camera
+                    stream = await navigator.mediaDevices.getUserMedia({ 
+                        video: true,
+                        audio: false
+                    });
+
+                    // Connect the camera stream to the video element
+                    videoElement.srcObject = stream;
+
+                    // Enable/disable buttons appropriately
+                    startButton.disabled = true;
+                    stopButton.disabled = false;
+                } catch (error) {
+                    console.error('Error accessing camera:', error);
+                    alert('Could not access the camera. Please ensure you have a camera connected and have granted permission to use it.');
+                }
+            }
+
+            // Function to stop the camera
+            function stopCamera() {
+                if (stream) {
+                    // Get all tracks from the stream and stop them
+                    const tracks = stream.getTracks();
+                    tracks.forEach(track => track.stop());
+
+                    // Remove the stream from the video element
+                    videoElement.srcObject = null;
+                    stream = null;
+
+                    // Enable/disable buttons appropriately
+                    startButton.disabled = false;
+                    stopButton.disabled = true;
+                }
+            }
+
+            // Add event listeners to buttons
+            startButton.addEventListener('click', startCamera);
+            stopButton.addEventListener('click', stopCamera);
+
+            // Initially disable the stop button
+            stopButton.disabled = true;
+        });
+    </script>
 </body>
 </html>
